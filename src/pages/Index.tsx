@@ -201,13 +201,22 @@ const Index = () => {
     return scored.sort((a, b) => b.score - a.score).slice(0, 4);
   }, [user]);
 
-  const mapLocations = attractions.map(a => ({
-    id: a.id,
-    name: a.name,
-    coords: a.coords,
-    description: a.description,
-    category: a.category,
-  }));
+  const mapLocations = [
+    ...attractions.map(a => ({
+      id: a.id,
+      name: a.name,
+      coords: a.coords,
+      description: a.description,
+      category: a.category,
+    })),
+    ...hotels.map(h => ({
+      id: h.id + 1000,
+      name: h.name,
+      coords: h.coords,
+      description: `${h.description} | ${h.price.toLocaleString('ru-RU')} ₽/ночь | Рейтинг: ${h.rating}`,
+      category: 'hotel',
+    }))
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
@@ -519,6 +528,55 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="map" className="space-y-6">
+            <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-4 border border-purple-200">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                <Icon name="Map" size={20} />
+                Легенда карты
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-emerald-500"></div>
+                  <span className="text-sm text-gray-700">Отели</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-green-500"></div>
+                  <span className="text-sm text-gray-700">Природа</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-blue-500"></div>
+                  <span className="text-sm text-gray-700">Пляжи</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-purple-500"></div>
+                  <span className="text-sm text-gray-700">Культура</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-orange-500"></div>
+                  <span className="text-sm text-gray-700">Еда</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-red-500"></div>
+                  <span className="text-sm text-gray-700">Активный отдых</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-cyan-500"></div>
+                  <span className="text-sm text-gray-700">Водопады</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-gray-500"></div>
+                  <span className="text-sm text-gray-700">Пещеры</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-yellow-400"></div>
+                  <span className="text-sm text-gray-700">Смотровые</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 rounded-full bg-sky-400"></div>
+                  <span className="text-sm text-gray-700">Горные лыжи</span>
+                </div>
+              </div>
+            </div>
+            
             <Card className="overflow-hidden bg-white/90 backdrop-blur-sm border-0 shadow-xl">
               <CardContent className="p-0">
                 <div className="h-[600px]">

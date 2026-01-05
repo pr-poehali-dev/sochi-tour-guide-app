@@ -41,11 +41,23 @@ const YandexMap = ({ locations, onLocationClick }: YandexMapProps) => {
                   hintContent: location.name
                 },
                 {
-                  preset: 'islands#icon',
-                  iconColor: location.category === 'nature' ? '#22c55e' :
+                  preset: location.category === 'hotel' ? 'islands#greenDotIcon' : 'islands#icon',
+                  iconColor: location.category === 'hotel' ? '#10b981' :
+                            location.category === 'nature' ? '#22c55e' :
                             location.category === 'beach' ? '#3b82f6' :
                             location.category === 'culture' ? '#8b5cf6' :
-                            location.category === 'food' ? '#f97316' : '#6366f1'
+                            location.category === 'food' ? '#f97316' :
+                            location.category === 'active' ? '#ef4444' :
+                            location.category === 'parks' ? '#84cc16' :
+                            location.category === 'museums' ? '#a855f7' :
+                            location.category === 'shopping' ? '#f59e0b' :
+                            location.category === 'waterfalls' ? '#06b6d4' :
+                            location.category === 'caves' ? '#737373' :
+                            location.category === 'viewpoints' ? '#fbbf24' :
+                            location.category === 'historical' ? '#92400e' :
+                            location.category === 'skiing' ? '#60a5fa' :
+                            location.category === 'spa' ? '#d946ef' :
+                            location.category === 'nightlife' ? '#8b5cf6' : '#6366f1'
                 }
               );
 
