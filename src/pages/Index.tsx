@@ -46,6 +46,51 @@ const Index = () => {
     { id: 'beach', name: 'Пляжи', icon: 'Waves' },
     { id: 'culture', name: 'Культура', icon: 'Landmark' },
     { id: 'food', name: 'Кухня', icon: 'UtensilsCrossed' },
+    { id: 'active', name: 'Активный отдых', icon: 'Zap' },
+    { id: 'family', name: 'Для семьи', icon: 'Users' },
+    { id: 'romantic', name: 'Романтика', icon: 'Heart' },
+    { id: 'adventure', name: 'Приключения', icon: 'Compass' },
+    { id: 'relax', name: 'Релакс', icon: 'Coffee' },
+    { id: 'hiking', name: 'Походы', icon: 'Footprints' },
+    { id: 'diving', name: 'Дайвинг', icon: 'Fish' },
+    { id: 'skiing', name: 'Горные лыжи', icon: 'Mountain' },
+    { id: 'spa', name: 'СПА', icon: 'Sparkles' },
+    { id: 'parks', name: 'Парки', icon: 'Trees' },
+    { id: 'museums', name: 'Музеи', icon: 'Building' },
+    { id: 'theater', name: 'Театр', icon: 'Drama' },
+    { id: 'nightlife', name: 'Ночная жизнь', icon: 'Moon' },
+    { id: 'shopping', name: 'Шопинг', icon: 'ShoppingBag' },
+    { id: 'waterfalls', name: 'Водопады', icon: 'Waves' },
+    { id: 'caves', name: 'Пещеры', icon: 'Mountain' },
+    { id: 'viewpoints', name: 'Смотровые', icon: 'Eye' },
+    { id: 'historical', name: 'История', icon: 'Clock' },
+    { id: 'architecture', name: 'Архитектура', icon: 'Building2' },
+    { id: 'gardens', name: 'Сады', icon: 'Flower' },
+    { id: 'zoo', name: 'Зоопарк', icon: 'PawPrint' },
+    { id: 'aquarium', name: 'Океанариум', icon: 'Fish' },
+    { id: 'amusement', name: 'Развлечения', icon: 'Rocket' },
+    { id: 'sports', name: 'Спорт', icon: 'Activity' },
+    { id: 'wellness', name: 'Здоровье', icon: 'Heart' },
+    { id: 'wine', name: 'Вино', icon: 'Wine' },
+    { id: 'coffee', name: 'Кофейни', icon: 'Coffee' },
+    { id: 'seafood', name: 'Морепродукты', icon: 'Fish' },
+    { id: 'traditional', name: 'Традиционная', icon: 'UtensilsCrossed' },
+    { id: 'asian', name: 'Азиатская', icon: 'UtensilsCrossed' },
+    { id: 'european', name: 'Европейская', icon: 'UtensilsCrossed' },
+    { id: 'street', name: 'Уличная еда', icon: 'Sandwich' },
+    { id: 'photography', name: 'Фотозоны', icon: 'Camera' },
+    { id: 'sunrise', name: 'Рассветы', icon: 'Sunrise' },
+    { id: 'sunset', name: 'Закаты', icon: 'Sunset' },
+    { id: 'bike', name: 'Велопрогулки', icon: 'Bike' },
+    { id: 'boat', name: 'Морские прогулки', icon: 'Ship' },
+    { id: 'fishing', name: 'Рыбалка', icon: 'Fish' },
+    { id: 'climbing', name: 'Скалолазание', icon: 'Mountain' },
+    { id: 'rafting', name: 'Рафтинг', icon: 'Waves' },
+    { id: 'paragliding', name: 'Параплан', icon: 'PlaneTakeoff' },
+    { id: 'horseback', name: 'Конные прогулки', icon: 'Horse' },
+    { id: 'yoga', name: 'Йога', icon: 'User' },
+    { id: 'meditation', name: 'Медитация', icon: 'Sparkles' },
+    { id: 'festivals', name: 'Фестивали', icon: 'PartyPopper' },
   ];
 
   const attractions = [
@@ -160,6 +205,64 @@ const Index = () => {
     return hotels.filter(h => isFavorite(h.id));
   }, [favorites]);
 
+  const recommendedHotels = useMemo(() => {
+    if (!user || !user.preferences) return hotels.slice(0, 6);
+    
+    const { budget, travelStyle, activities } = user.preferences;
+    
+    const scored = hotels.map(hotel => {
+      let score = 0;
+      
+      if (budget === 'economy' && hotel.price <= 6000) score += 3;
+      if (budget === 'medium' && hotel.price > 6000 && hotel.price <= 12000) score += 3;
+      if (budget === 'premium' && hotel.price > 12000) score += 3;
+      
+      if (travelStyle === 'family' && hotel.amenities.includes('pool')) score += 2;
+      if (travelStyle === 'romantic' && hotel.type === 'resort') score += 2;
+      if (travelStyle === 'active' && hotel.district === 'krasnaya-polyana') score += 2;
+      if (travelStyle === 'relaxing' && hotel.amenities.includes('spa')) score += 2;
+      
+      if (activities.includes('Горы') && hotel.district === 'krasnaya-polyana') score += 2;
+      if (activities.includes('Пляж') && hotel.amenities.includes('beach')) score += 2;
+      if (activities.includes('Спорт') && hotel.amenities.includes('fitness')) score += 1;
+      if (activities.includes('Шопинг') && hotel.district === 'center') score += 1;
+      if (activities.includes('Культура') && hotel.district === 'center') score += 1;
+      if (activities.includes('Гастрономия') && hotel.amenities.includes('restaurant')) score += 1;
+      
+      score += hotel.rating;
+      
+      return { ...hotel, score };
+    });
+    
+    return scored.sort((a, b) => b.score - a.score).slice(0, 6);
+  }, [user]);
+
+  const recommendedAttractions = useMemo(() => {
+    if (!user || !user.preferences) return attractions.slice(0, 4);
+    
+    const { travelStyle, activities } = user.preferences;
+    
+    const scored = attractions.map(attraction => {
+      let score = 0;
+      
+      if (travelStyle === 'family' && attraction.tags.includes('Семья')) score += 2;
+      if (travelStyle === 'romantic' && (attraction.category === 'beach' || attraction.tags.includes('Виды'))) score += 2;
+      if (travelStyle === 'active' && (attraction.category === 'nature' || attraction.tags.includes('Активный отдых'))) score += 2;
+      if (travelStyle === 'relaxing' && (attraction.category === 'beach' || attraction.tags.includes('Отдых'))) score += 2;
+      
+      if (activities.includes('Горы') && attraction.tags.includes('Горы')) score += 2;
+      if (activities.includes('Пляж') && attraction.category === 'beach') score += 2;
+      if (activities.includes('Культура') && attraction.category === 'culture') score += 2;
+      if (activities.includes('Гастрономия') && attraction.category === 'food') score += 2;
+      
+      score += attraction.rating;
+      
+      return { ...attraction, score };
+    });
+    
+    return scored.sort((a, b) => b.score - a.score).slice(0, 4);
+  }, [user]);
+
   const mapLocations = attractions.map(a => ({
     id: a.id,
     name: a.name,
@@ -267,6 +370,82 @@ const Index = () => {
           </TabsList>
 
           <TabsContent value="explore" className="space-y-6">
+            {user && (
+              <div className="bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-2xl p-6 border border-purple-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <Icon name="Sparkles" size={24} className="text-purple-600" />
+                  <h2 className="text-2xl font-bold text-gray-800">Рекомендации для вас</h2>
+                </div>
+                
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                      <Icon name="MapPin" size={18} />
+                      Места для посещения
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {recommendedAttractions.map(attraction => (
+                        <Card key={attraction.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 bg-white border-0">
+                          <div className="relative h-40 overflow-hidden">
+                            <img 
+                              src={attraction.image} 
+                              alt={attraction.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                            <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full">
+                              <Icon name="Star" size={12} className="text-yellow-500 fill-yellow-500" />
+                              <span className="font-semibold text-xs">{attraction.rating}</span>
+                            </div>
+                          </div>
+                          <CardContent className="p-3">
+                            <h4 className="font-bold text-sm mb-1 text-gray-800 line-clamp-1">{attraction.name}</h4>
+                            <p className="text-gray-600 text-xs line-clamp-2">{attraction.description}</p>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-3 flex items-center gap-2">
+                      <Icon name="Hotel" size={18} />
+                      Отели по вашим предпочтениям
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {recommendedHotels.map(hotel => (
+                        <Card key={hotel.id} className="group overflow-hidden hover:shadow-xl transition-all duration-300 bg-white border-0">
+                          <div className="relative h-40 overflow-hidden">
+                            <img 
+                              src={hotel.image} 
+                              alt={hotel.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                            <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-full">
+                              <Icon name="Star" size={12} className="text-yellow-500 fill-yellow-500" />
+                              <span className="font-semibold text-xs">{hotel.rating}</span>
+                            </div>
+                            <div className="absolute top-2 right-2">
+                              <Badge className="bg-purple-600 text-white text-xs">
+                                {'★'.repeat(hotel.stars || 3)}
+                              </Badge>
+                            </div>
+                          </div>
+                          <CardContent className="p-3">
+                            <h4 className="font-bold text-sm mb-1 text-gray-800 line-clamp-1">{hotel.name}</h4>
+                            <p className="text-gray-600 text-xs mb-2">{hotel.location}</p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-purple-600 font-bold text-sm">{hotel.price.toLocaleString('ru-RU')} ₽</span>
+                              <BookingDialog hotel={hotel} onBook={(bookingData) => addBooking(bookingData)} />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
               {categories.map(cat => (
                 <Button
