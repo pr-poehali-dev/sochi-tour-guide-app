@@ -18,6 +18,7 @@ import YandexMap from '@/components/YandexMap';
 import HotelFiltersComponent, { HotelFilters as HotelFiltersType } from '@/components/HotelFilters';
 import BookingDialog from '@/components/BookingDialog';
 import { hotels } from '@/data/hotels';
+import { attractions } from '@/data/attractions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useBooking } from '@/contexts/BookingContext';
@@ -91,69 +92,6 @@ const Index = () => {
     { id: 'yoga', name: 'Йога', icon: 'User' },
     { id: 'meditation', name: 'Медитация', icon: 'Sparkles' },
     { id: 'festivals', name: 'Фестивали', icon: 'PartyPopper' },
-  ];
-
-  const attractions = [
-    {
-      id: 1,
-      name: 'Олимпийский парк',
-      category: 'culture',
-      rating: 4.8,
-      image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/082a5de6-cae2-4b0d-bc00-4c1117fb2428.jpg',
-      description: 'Наследие Олимпиады-2014',
-      tags: ['Спорт', 'История', 'Архитектура'],
-      coords: [43.402981, 39.955781] as [number, number],
-    },
-    {
-      id: 2,
-      name: 'Роза Хутор',
-      category: 'nature',
-      rating: 4.9,
-      image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/054a8718-7ec6-4118-8460-ad4a63a66cb2.jpg',
-      description: 'Горнолыжный курорт',
-      tags: ['Горы', 'Активный отдых', 'Природа'],
-      coords: [43.739022, 40.314606] as [number, number],
-    },
-    {
-      id: 3,
-      name: 'Пляж Ривьера',
-      category: 'beach',
-      rating: 4.7,
-      image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/cb07cf6c-e566-4ba6-ae41-62102b66fc82.jpg',
-      description: 'Лучший городской пляж',
-      tags: ['Море', 'Отдых', 'Семья'],
-      coords: [43.588947, 39.720952] as [number, number],
-    },
-    {
-      id: 4,
-      name: 'Агурские водопады',
-      category: 'nature',
-      rating: 4.9,
-      image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/1a1f4689-6dd7-46cf-b947-c1b619d5ba94.jpg',
-      description: 'Живописные водопады',
-      tags: ['Природа', 'Треккинг', 'Фото'],
-      coords: [43.552778, 39.827222] as [number, number],
-    },
-    {
-      id: 5,
-      name: 'Скайпарк',
-      category: 'culture',
-      rating: 4.8,
-      image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/6b31097a-d04c-4be5-b323-7093fab0a2db.jpg',
-      description: 'Экстрим и панорамы',
-      tags: ['Развлечения', 'Адреналин', 'Виды'],
-      coords: [43.564167, 39.956389] as [number, number],
-    },
-    {
-      id: 6,
-      name: 'Дагомысские чайные плантации',
-      category: 'food',
-      rating: 4.6,
-      image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/a9035e10-f5f9-4884-8dbf-ff67854ca9e3.jpg',
-      description: 'Северная чайная столица',
-      tags: ['Чай', 'Традиции', 'Гастрономия'],
-      coords: [43.668611, 39.665833] as [number, number],
-    },
   ];
 
   const filteredAttractions = useMemo(() => {
