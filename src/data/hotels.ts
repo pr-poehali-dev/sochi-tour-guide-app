@@ -8,7 +8,7 @@ export const hotels: Hotel[] = [
     stars: 5,
     price: 12500,
     type: 'resort',
-    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/c8303193-5376-491f-98a8-f1710e29c034.jpg',
+    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/3f639ddd-913c-42a0-9b2f-9bbec577cbce.jpg',
     images: [
       'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/c8303193-5376-491f-98a8-f1710e29c034.jpg',
       'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/d67fa356-cd90-4669-8512-dca109961161.jpg',
@@ -29,7 +29,7 @@ export const hotels: Hotel[] = [
     stars: 5,
     price: 15000,
     type: 'hotel',
-    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/d67fa356-cd90-4669-8512-dca109961161.jpg',
+    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/85868be0-49ec-41c3-b0f5-b5cb440f473d.jpg',
     images: [
       'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/d67fa356-cd90-4669-8512-dca109961161.jpg',
     ],
@@ -49,7 +49,7 @@ export const hotels: Hotel[] = [
     stars: 5,
     price: 10000,
     type: 'hotel',
-    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/2b751773-7e2d-44f1-9db2-9baed49cb943.jpg',
+    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/85868be0-49ec-41c3-b0f5-b5cb440f473d.jpg',
     images: [
       'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/2b751773-7e2d-44f1-9db2-9baed49cb943.jpg',
     ],
@@ -129,7 +129,7 @@ export const hotels: Hotel[] = [
     stars: 4,
     price: 9000,
     type: 'hotel',
-    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/054a8718-7ec6-4118-8460-ad4a63a66cb2.jpg',
+    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/1bf786d3-1235-4cea-afc5-8eb44b259fd5.jpg',
     images: [
       'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/054a8718-7ec6-4118-8460-ad4a63a66cb2.jpg',
     ],
@@ -209,7 +209,7 @@ export const hotels: Hotel[] = [
     stars: 3,
     price: 4500,
     type: 'apartment',
-    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/c8303193-5376-491f-98a8-f1710e29c034.jpg',
+    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/d76e2829-9f84-42b0-b1e7-f02bbd210c18.jpg',
     images: [
       'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/c8303193-5376-491f-98a8-f1710e29c034.jpg',
     ],
@@ -229,7 +229,7 @@ export const hotels: Hotel[] = [
     stars: 3,
     price: 3500,
     type: 'guesthouse',
-    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/d67fa356-cd90-4669-8512-dca109961161.jpg',
+    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/1ad962e3-cb2d-48ad-85bb-6e0d9f6d584e.jpg',
     images: [
       'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/d67fa356-cd90-4669-8512-dca109961161.jpg',
     ],
@@ -289,7 +289,7 @@ export const hotels: Hotel[] = [
     stars: 3,
     price: 5000,
     type: 'apartment',
-    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/f23548a0-8ea7-4e92-9de0-eb6820edb6e0.jpg',
+    image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/d76e2829-9f84-42b0-b1e7-f02bbd210c18.jpg',
     images: [
       'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/f23548a0-8ea7-4e92-9de0-eb6820edb6e0.jpg',
     ],

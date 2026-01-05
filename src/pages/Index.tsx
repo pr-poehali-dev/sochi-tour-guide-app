@@ -27,7 +27,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
-  const { addBooking } = useBooking();
+  const { addBooking, getUserBookings, cancelBooking } = useBooking();
   
   const [activeTab, setActiveTab] = useState('explore');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -310,9 +310,9 @@ const Index = () => {
               <Icon name="Map" size={18} />
               <span className="hidden sm:inline">Карта</span>
             </TabsTrigger>
-            <TabsTrigger value="favorites" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg">
-              <Icon name="Heart" size={18} />
-              <span className="hidden sm:inline">Избранное</span>
+            <TabsTrigger value="bookings" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg">
+              <Icon name="Calendar" size={18} />
+              <span className="hidden sm:inline">Мои бронирования</span>
             </TabsTrigger>
           </TabsList>
 
@@ -586,13 +586,13 @@ const Index = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="favorites" className="space-y-6">
+          <TabsContent value="bookings" className="space-y-6">
             {!user ? (
               <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
                 <CardContent className="p-12 text-center">
-                  <Icon name="Heart" size={64} className="mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">Войдите, чтобы сохранять избранное</h3>
-                  <p className="text-gray-600 mb-6">Создайте аккаунт или войдите, чтобы сохранять любимые места и отели</p>
+                  <Icon name="Calendar" size={64} className="mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">Войдите, чтобы видеть бронирования</h3>
+                  <p className="text-gray-600 mb-6">Создайте аккаунт или войдите, чтобы бронировать отели</p>
                   <div className="flex gap-3 justify-center">
                     <Button onClick={() => navigate('/login')} variant="outline">
                       Войти
@@ -603,17 +603,126 @@ const Index = () => {
                   </div>
                 </CardContent>
               </Card>
-            ) : favorites.length === 0 ? (
+            ) : getUserBookings().filter(b => b.status !== 'cancelled').length === 0 ? (
               <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
                 <CardContent className="p-12 text-center">
-                  <Icon name="Heart" size={64} className="mx-auto text-gray-300 mb-4" />
-                  <h3 className="text-2xl font-bold text-gray-800 mb-2">Пока ничего не добавлено</h3>
-                  <p className="text-gray-600">Добавляйте места и отели в избранное, нажимая на иконку сердца</p>
+                  <Icon name="Calendar" size={64} className="mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">У вас пока нет бронирований</h3>
+                  <p className="text-gray-600 mb-6">Забронируйте отель и он появится здесь</p>
+                  <Button onClick={() => setActiveTab('hotels')} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                    Посмотреть отели
+                  </Button>
                 </CardContent>
               </Card>
             ) : (
-              <>
-                {favoriteAttractions.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800 mb-6">Мои бронирования</h2>
+                <div className="grid grid-cols-1 gap-6">
+                  {getUserBookings().filter(b => b.status !== 'cancelled').map(booking => {
+                    const hotel = hotels.find(h => h.id === booking.hotelId);
+                    if (!hotel) return null;
+                    
+                    return (
+                      <Card key={booking.id} className="overflow-hidden bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+                        <div className="flex flex-col md:flex-row">
+                          <div className="md:w-1/3 h-64 md:h-auto relative overflow-hidden">
+                            <img 
+                              src={hotel.image} 
+                              alt={hotel.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <Badge className="absolute top-3 left-3 bg-green-600 text-white">
+                              {booking.status === 'confirmed' ? 'Подтверждено' : 'Ожидание'}
+                            </Badge>
+                          </div>
+                          <CardContent className="md:w-2/3 p-6">
+                            <div className="flex justify-between items-start mb-4">
+                              <div>
+                                <h3 className="text-2xl font-bold text-gray-800 mb-2">{hotel.name}</h3>
+                                <p className="text-gray-600 flex items-center gap-2 mb-2">
+                                  <Icon name="MapPin" size={16} />
+                                  {hotel.location}
+                                </p>
+                                <div className="flex items-center gap-2 mb-3">
+                                  <Icon name="Star" size={16} className="text-yellow-500 fill-yellow-500" />
+                                  <span className="font-semibold">{hotel.rating}</span>
+                                  <Badge className="ml-2 bg-purple-600 text-white">
+                                    {'★'.repeat(hotel.stars || 3)}
+                                  </Badge>
+                                </div>
+                              </div>
+                              <div className="text-right">
+                                <p className="text-sm text-gray-500 mb-1">Номер брони</p>
+                                <p className="font-mono font-bold text-purple-600">{booking.id}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4 p-4 bg-gray-50 rounded-lg">
+                              <div>
+                                <p className="text-xs text-gray-500 mb-1">Заезд</p>
+                                <p className="font-semibold flex items-center gap-1">
+                                  <Icon name="Calendar" size={14} />
+                                  {new Date(booking.checkIn).toLocaleDateString('ru-RU')}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 mb-1">Выезд</p>
+                                <p className="font-semibold flex items-center gap-1">
+                                  <Icon name="Calendar" size={14} />
+                                  {new Date(booking.checkOut).toLocaleDateString('ru-RU')}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 mb-1">Гости</p>
+                                <p className="font-semibold flex items-center gap-1">
+                                  <Icon name="Users" size={14} />
+                                  {booking.guests} чел.
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-xs text-gray-500 mb-1">Тип номера</p>
+                                <p className="font-semibold">{booking.roomType === 'standard' ? 'Стандарт' : booking.roomType === 'deluxe' ? 'Делюкс' : 'Люкс'}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center justify-between pt-4 border-t">
+                              <div>
+                                <p className="text-sm text-gray-500 mb-1">Итого к оплате</p>
+                                <p className="text-3xl font-bold text-purple-600">{booking.totalPrice.toLocaleString('ru-RU')} ₽</p>
+                              </div>
+                              <Button 
+                                variant="destructive" 
+                                onClick={() => cancelBooking(booking.id)}
+                                className="bg-red-500 hover:bg-red-600"
+                              >
+                                <Icon name="X" size={16} className="mr-2" />
+                                Отменить
+                              </Button>
+                            </div>
+                            
+                            {booking.specialRequests && (
+                              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                                <p className="text-sm text-gray-600">
+                                  <strong>Особые пожелания:</strong> {booking.specialRequests}
+                                </p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </div>
+                      </Card>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </main>
+    </div>
+  );
+};
+
+export default Index;
                   <div>
                     <h2 className="text-2xl font-bold text-gray-800 mb-4">Избранные места</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
