@@ -18,6 +18,9 @@ export interface HotelFilters {
   priceRange: [number, number];
   minRating: number;
   amenities: string[];
+  stars: number[];
+  districts: string[];
+  types: string[];
 }
 
 interface HotelFiltersProps {
@@ -34,6 +37,22 @@ const availableAmenities = [
   { id: 'fitness', label: 'Фитнес', icon: 'Dumbbell' },
   { id: 'beach', label: 'Пляж', icon: 'Umbrella' },
   { id: 'bar', label: 'Бар', icon: 'Wine' },
+];
+
+const districts = [
+  { id: 'adler', label: 'Адлерский район' },
+  { id: 'center', label: 'Центральный район' },
+  { id: 'olympic', label: 'Олимпийский парк' },
+  { id: 'krasnaya-polyana', label: 'Красная Поляна' },
+  { id: 'lazarevsky', label: 'Лазаревский район' },
+  { id: 'khostinsky', label: 'Хостинский район' },
+];
+
+const types = [
+  { id: 'hotel', label: 'Отель' },
+  { id: 'apartment', label: 'Апартаменты' },
+  { id: 'guesthouse', label: 'Гостевой дом' },
+  { id: 'resort', label: 'Курорт' },
 ];
 
 const HotelFiltersComponent = ({ filters, onChange }: HotelFiltersProps) => {
@@ -60,11 +79,41 @@ const HotelFiltersComponent = ({ filters, onChange }: HotelFiltersProps) => {
     onChange(newFilters);
   };
 
+  const handleStarsToggle = (stars: number) => {
+    const newStars = localFilters.stars.includes(stars)
+      ? localFilters.stars.filter(s => s !== stars)
+      : [...localFilters.stars, stars];
+    const newFilters = { ...localFilters, stars: newStars };
+    setLocalFilters(newFilters);
+    onChange(newFilters);
+  };
+
+  const handleDistrictToggle = (district: string) => {
+    const newDistricts = localFilters.districts.includes(district)
+      ? localFilters.districts.filter(d => d !== district)
+      : [...localFilters.districts, district];
+    const newFilters = { ...localFilters, districts: newDistricts };
+    setLocalFilters(newFilters);
+    onChange(newFilters);
+  };
+
+  const handleTypeToggle = (type: string) => {
+    const newTypes = localFilters.types.includes(type)
+      ? localFilters.types.filter(t => t !== type)
+      : [...localFilters.types, type];
+    const newFilters = { ...localFilters, types: newTypes };
+    setLocalFilters(newFilters);
+    onChange(newFilters);
+  };
+
   const handleReset = () => {
     const resetFilters: HotelFilters = {
       priceRange: [0, 50000],
       minRating: 0,
       amenities: [],
+      stars: [],
+      districts: [],
+      types: [],
     };
     setLocalFilters(resetFilters);
     onChange(resetFilters);
@@ -105,6 +154,69 @@ const HotelFiltersComponent = ({ filters, onChange }: HotelFiltersProps) => {
             <span>Любой</span>
             <span className="font-semibold">{localFilters.minRating.toFixed(1)} ⭐</span>
           </div>
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-base font-semibold mb-3 block">Звёздность</Label>
+        <div className="flex gap-2">
+          {[3, 4, 5].map((star) => (
+            <div key={star} className="flex items-center space-x-2">
+              <Checkbox
+                id={`star-${star}`}
+                checked={localFilters.stars.includes(star)}
+                onCheckedChange={() => handleStarsToggle(star)}
+              />
+              <label
+                htmlFor={`star-${star}`}
+                className="text-sm font-medium leading-none cursor-pointer"
+              >
+                {star} ★
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-base font-semibold mb-3 block">Район</Label>
+        <div className="space-y-2">
+          {districts.map((district) => (
+            <div key={district.id} className="flex items-center space-x-2">
+              <Checkbox
+                id={district.id}
+                checked={localFilters.districts.includes(district.id)}
+                onCheckedChange={() => handleDistrictToggle(district.id)}
+              />
+              <label
+                htmlFor={district.id}
+                className="text-sm font-medium leading-none cursor-pointer"
+              >
+                {district.label}
+              </label>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <Label className="text-base font-semibold mb-3 block">Тип размещения</Label>
+        <div className="space-y-2">
+          {types.map((type) => (
+            <div key={type.id} className="flex items-center space-x-2">
+              <Checkbox
+                id={type.id}
+                checked={localFilters.types.includes(type.id)}
+                onCheckedChange={() => handleTypeToggle(type.id)}
+              />
+              <label
+                htmlFor={type.id}
+                className="text-sm font-medium leading-none cursor-pointer"
+              >
+                {type.label}
+              </label>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -159,9 +271,13 @@ const HotelFiltersComponent = ({ filters, onChange }: HotelFiltersProps) => {
               <Icon name="SlidersHorizontal" size={16} className="mr-2" />
               Фильтры
               {(localFilters.amenities.length > 0 || localFilters.minRating > 0 || 
-                localFilters.priceRange[0] > 0 || localFilters.priceRange[1] < 50000) && (
+                localFilters.priceRange[0] > 0 || localFilters.priceRange[1] < 50000 ||
+                localFilters.stars.length > 0 || localFilters.districts.length > 0 ||
+                localFilters.types.length > 0) && (
                 <span className="ml-2 bg-primary text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
-                  {localFilters.amenities.length + (localFilters.minRating > 0 ? 1 : 0) + 
+                  {localFilters.amenities.length + localFilters.stars.length + 
+                   localFilters.districts.length + localFilters.types.length +
+                   (localFilters.minRating > 0 ? 1 : 0) + 
                    ((localFilters.priceRange[0] > 0 || localFilters.priceRange[1] < 50000) ? 1 : 0)}
                 </span>
               )}

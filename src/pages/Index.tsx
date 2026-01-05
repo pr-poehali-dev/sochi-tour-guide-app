@@ -1,23 +1,43 @@
 import { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import Icon from '@/components/ui/icon';
 import YandexMap from '@/components/YandexMap';
 import HotelFilters, { HotelFilters as HotelFiltersType } from '@/components/HotelFilters';
 import BookingDialog from '@/components/BookingDialog';
+import { hotels } from '@/data/hotels';
+import { useAuth } from '@/contexts/AuthContext';
+import { useFavorites } from '@/contexts/FavoritesContext';
+import { useBooking } from '@/contexts/BookingContext';
 
 const Index = () => {
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
+  const { favorites, toggleFavorite, isFavorite } = useFavorites();
+  const { addBooking } = useBooking();
+  
   const [activeTab, setActiveTab] = useState('explore');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [favorites, setFavorites] = useState<number[]>([]);
   const [hotelFilters, setHotelFilters] = useState<HotelFiltersType>({
     priceRange: [0, 50000],
     minRating: 0,
     amenities: [],
+    stars: [],
+    districts: [],
+    types: [],
   });
 
   const categories = [
@@ -91,69 +111,6 @@ const Index = () => {
     },
   ];
 
-  const hotels = [
-    {
-      id: 1,
-      name: 'Radisson Blu Resort',
-      rating: 4.8,
-      price: 12500,
-      image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/c8303193-5376-491f-98a8-f1710e29c034.jpg',
-      location: 'Адлерский район',
-      amenities: ['wifi', 'pool', 'spa', 'restaurant'],
-      amenitiesDisplay: ['Wi-Fi', 'Бассейн', 'СПА', 'Ресторан'],
-    },
-    {
-      id: 2,
-      name: 'Swissotel Сочи Камелия',
-      rating: 4.9,
-      price: 15000,
-      image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/d67fa356-cd90-4669-8512-dca109961161.jpg',
-      location: 'Центральный район',
-      amenities: ['wifi', 'beach', 'fitness', 'parking'],
-      amenitiesDisplay: ['Wi-Fi', 'Пляж', 'Фитнес', 'Парковка'],
-    },
-    {
-      id: 3,
-      name: 'Hyatt Regency Sochi',
-      rating: 4.7,
-      price: 10000,
-      image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/2b751773-7e2d-44f1-9db2-9baed49cb943.jpg',
-      location: 'Олимпийский парк',
-      amenities: ['wifi', 'pool', 'bar'],
-      amenitiesDisplay: ['Wi-Fi', 'Бассейн', 'Бар'],
-    },
-    {
-      id: 4,
-      name: 'Pullman Sochi Centre',
-      rating: 4.6,
-      price: 8500,
-      image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/cab4cbc9-6e61-4b78-aaa5-1461e0acd9c6.jpg',
-      location: 'Центральный район',
-      amenities: ['wifi', 'restaurant', 'parking', 'fitness'],
-      amenitiesDisplay: ['Wi-Fi', 'Ресторан', 'Парковка', 'Фитнес'],
-    },
-    {
-      id: 5,
-      name: 'Mercure Sochi Centre',
-      rating: 4.5,
-      price: 7000,
-      image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/f23548a0-8ea7-4e92-9de0-eb6820edb6e0.jpg',
-      location: 'Центральный район',
-      amenities: ['wifi', 'bar', 'parking'],
-      amenitiesDisplay: ['Wi-Fi', 'Бар', 'Парковка'],
-    },
-    {
-      id: 6,
-      name: 'Bogatyr Hotel',
-      rating: 4.8,
-      price: 14000,
-      image: 'https://cdn.poehali.dev/projects/d513519f-09ad-4dcc-b513-880a607d779c/files/1478eee0-f935-4e2b-88c3-afea9816bfa9.jpg',
-      location: 'Адлерский район',
-      amenities: ['wifi', 'pool', 'spa', 'beach', 'restaurant'],
-      amenitiesDisplay: ['Wi-Fi', 'Бассейн', 'СПА', 'Пляж', 'Ресторан'],
-    },
-  ];
-
   const filteredAttractions = useMemo(() => {
     let results = attractions;
     
@@ -180,23 +137,28 @@ const Index = () => {
       const matchesRating = hotel.rating >= hotelFilters.minRating;
       const matchesAmenities = hotelFilters.amenities.length === 0 || 
                                hotelFilters.amenities.every(a => hotel.amenities.includes(a));
+      const matchesStars = hotelFilters.stars.length === 0 || 
+                          hotelFilters.stars.includes(hotel.stars);
+      const matchesDistricts = hotelFilters.districts.length === 0 || 
+                              hotelFilters.districts.includes(hotel.district);
+      const matchesTypes = hotelFilters.types.length === 0 || 
+                          hotelFilters.types.includes(hotel.type);
       const matchesSearch = !searchQuery.trim() || 
                            hotel.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            hotel.location.toLowerCase().includes(searchQuery.toLowerCase());
       
-      return matchesPrice && matchesRating && matchesAmenities && matchesSearch;
+      return matchesPrice && matchesRating && matchesAmenities && matchesStars && 
+             matchesDistricts && matchesTypes && matchesSearch;
     });
   }, [hotelFilters, searchQuery]);
 
   const favoriteAttractions = useMemo(() => {
-    return attractions.filter(a => favorites.includes(a.id));
+    return attractions.filter(a => isFavorite(a.id));
   }, [favorites]);
 
-  const toggleFavorite = (id: number) => {
-    setFavorites(prev => 
-      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
-    );
-  };
+  const favoriteHotels = useMemo(() => {
+    return hotels.filter(h => isFavorite(h.id));
+  }, [favorites]);
 
   const mapLocations = attractions.map(a => ({
     id: a.id,
@@ -220,358 +182,375 @@ const Index = () => {
                 <p className="text-sm text-white/80">Твой умный путеводитель</p>
               </div>
             </div>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-white hover:bg-white/20"
-              onClick={() => setActiveTab('profile')}
-            >
-              <Icon name="User" size={24} />
-            </Button>
+            
+            <div className="flex items-center gap-3">
+              {user ? (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" className="bg-white/20 border-white/30 hover:bg-white/30 text-white">
+                      <Icon name="User" size={18} className="mr-2" />
+                      {user.name}
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Мой аккаунт</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => navigate('/profile')}>
+                      <Icon name="User" size={16} className="mr-2" />
+                      Профиль
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/bookings')}>
+                      <Icon name="Calendar" size={16} className="mr-2" />
+                      Мои бронирования
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={logout} className="text-red-600">
+                      <Icon name="LogOut" size={16} className="mr-2" />
+                      Выйти
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              ) : (
+                <>
+                  <Button 
+                    variant="outline" 
+                    className="bg-white/20 border-white/30 hover:bg-white/30 text-white"
+                    onClick={() => navigate('/login')}
+                  >
+                    <Icon name="LogIn" size={18} className="mr-2" />
+                    Войти
+                  </Button>
+                  <Button 
+                    className="bg-white text-purple-600 hover:bg-white/90"
+                    onClick={() => navigate('/register')}
+                  >
+                    <Icon name="UserPlus" size={18} className="mr-2" />
+                    Регистрация
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
+
           <div className="relative">
-            <Icon name="Search" size={20} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <Input 
-              placeholder="Поиск мест, отелей, активностей..." 
-              className="pl-10 bg-white/95 backdrop-blur-sm border-0 h-12 rounded-xl"
+            <Icon name="Search" size={20} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Input
+              type="text"
+              placeholder="Поиск мест и отелей..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-12 pr-4 py-6 bg-white/95 backdrop-blur-sm border-0 rounded-xl text-gray-800 placeholder:text-gray-500 focus-visible:ring-2 focus-visible:ring-white/50"
             />
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6 bg-white/80 backdrop-blur-sm p-1 h-auto rounded-xl">
-            <TabsTrigger value="explore" className="flex flex-col items-center gap-1 py-3 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg">
-              <Icon name="Compass" size={20} />
-              <span className="text-xs">Исследовать</span>
+      <main className="max-w-7xl mx-auto p-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 bg-white/80 backdrop-blur-sm p-1 rounded-xl shadow-md">
+            <TabsTrigger value="explore" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg">
+              <Icon name="Compass" size={18} />
+              <span className="hidden sm:inline">Обзор</span>
             </TabsTrigger>
-            <TabsTrigger value="hotels" className="flex flex-col items-center gap-1 py-3 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg">
-              <Icon name="Hotel" size={20} />
-              <span className="text-xs">Отели</span>
+            <TabsTrigger value="hotels" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg">
+              <Icon name="Hotel" size={18} />
+              <span className="hidden sm:inline">Отели</span>
             </TabsTrigger>
-            <TabsTrigger value="map" className="flex flex-col items-center gap-1 py-3 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg">
-              <Icon name="MapPin" size={20} />
-              <span className="text-xs">Карта</span>
+            <TabsTrigger value="map" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg">
+              <Icon name="Map" size={18} />
+              <span className="hidden sm:inline">Карта</span>
             </TabsTrigger>
-            <TabsTrigger value="profile" className="flex flex-col items-center gap-1 py-3 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg">
-              <Icon name="Heart" size={20} />
-              <span className="text-xs">Избранное</span>
-              {favorites.length > 0 && (
-                <Badge className="absolute -top-1 -right-1 bg-red-500 text-white h-5 w-5 flex items-center justify-center p-0 text-xs">
-                  {favorites.length}
-                </Badge>
-              )}
+            <TabsTrigger value="favorites" className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white rounded-lg">
+              <Icon name="Heart" size={18} />
+              <span className="hidden sm:inline">Избранное</span>
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="explore" className="space-y-6 animate-fade-in">
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">🔥 Персональные рекомендации</h2>
-                <Button variant="ghost" size="sm" className="text-primary">
-                  <Icon name="Settings" size={16} className="mr-1" />
-                  Настроить
+          <TabsContent value="explore" className="space-y-6">
+            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+              {categories.map(cat => (
+                <Button
+                  key={cat.id}
+                  variant={selectedCategory === cat.id ? 'default' : 'outline'}
+                  onClick={() => setSelectedCategory(cat.id)}
+                  className={`flex items-center gap-2 whitespace-nowrap ${
+                    selectedCategory === cat.id 
+                      ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:opacity-90' 
+                      : 'bg-white/80 hover:bg-white'
+                  }`}
+                >
+                  <Icon name={cat.icon as any} size={18} />
+                  {cat.name}
                 </Button>
-              </div>
-              <Card className="bg-gradient-to-br from-orange-400 to-pink-500 text-white border-0 shadow-xl hover-scale cursor-pointer">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0">
-                      <Icon name="Sparkles" size={24} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-bold text-lg mb-2">Для любителей активного отдыха</h3>
-                      <p className="text-sm text-white/90 mb-3">На основе ваших предпочтений мы подобрали маршрут: Роза Хутор → Агурские водопады → Скайпарк</p>
-                      <Button 
-                        variant="secondary" 
-                        size="sm" 
-                        className="bg-white text-orange-600 hover:bg-white/90"
-                        onClick={() => setActiveTab('map')}
-                      >
-                        Посмотреть маршрут
-                        <Icon name="ArrowRight" size={16} className="ml-2" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </section>
+              ))}
+            </div>
 
-            <section>
-              <h2 className="text-xl font-bold mb-4">Категории</h2>
-              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                {categories.map((cat) => (
-                  <Button
-                    key={cat.id}
-                    variant={selectedCategory === cat.id ? 'default' : 'outline'}
-                    className={`flex items-center gap-2 whitespace-nowrap rounded-xl transition-all ${
-                      selectedCategory === cat.id 
-                        ? 'gradient-bg text-white border-0 shadow-lg' 
-                        : 'bg-white hover:bg-gray-50 hover-scale'
-                    }`}
-                    onClick={() => setSelectedCategory(cat.id)}
-                  >
-                    <Icon name={cat.icon as any} size={18} />
-                    {cat.name}
-                  </Button>
-                ))}
-              </div>
-            </section>
-
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">
-                  {searchQuery ? `Результаты поиска (${filteredAttractions.length})` : 'Популярные места'}
-                </h2>
-                {searchQuery && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => setSearchQuery('')}
-                  >
-                    <Icon name="X" size={16} className="mr-1" />
-                    Очистить
-                  </Button>
-                )}
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredAttractions.map((attraction, index) => (
-                  <Card 
-                    key={attraction.id} 
-                    className="overflow-hidden hover-scale border-0 shadow-lg bg-white cursor-pointer"
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <div className="relative h-48 overflow-hidden">
-                      <img 
-                        src={attraction.image} 
-                        alt={attraction.name}
-                        className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-                      />
-                      <div className="absolute top-3 right-3">
-                        <Badge className="bg-white/95 backdrop-blur-sm text-gray-900 border-0 shadow-md">
-                          <Icon name="Star" size={14} className="mr-1 fill-yellow-400 text-yellow-400" />
-                          {attraction.rating}
-                        </Badge>
-                      </div>
-                      <Button 
-                        size="icon" 
-                        variant="ghost" 
-                        className={`absolute top-3 left-3 backdrop-blur-sm ${
-                          favorites.includes(attraction.id)
-                            ? 'bg-red-500 hover:bg-red-600 text-white'
-                            : 'bg-white/20 hover:bg-white/30 text-white'
-                        }`}
-                        onClick={() => toggleFavorite(attraction.id)}
-                      >
-                        <Icon name="Heart" size={20} className={favorites.includes(attraction.id) ? 'fill-white' : ''} />
-                      </Button>
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-bold text-lg mb-1">{attraction.name}</h3>
-                      <p className="text-sm text-gray-600 mb-3">{attraction.description}</p>
-                      <div className="flex flex-wrap gap-2">
-                        {attraction.tags.map((tag) => (
-                          <Badge key={tag} variant="secondary" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-              {filteredAttractions.length === 0 && (
-                <div className="text-center py-12">
-                  <Icon name="SearchX" size={48} className="mx-auto mb-4 text-gray-400" />
-                  <h3 className="text-xl font-bold mb-2">Ничего не найдено</h3>
-                  <p className="text-gray-600">Попробуйте изменить поисковый запрос или фильтры</p>
-                </div>
-              )}
-            </section>
-          </TabsContent>
-
-          <TabsContent value="hotels" className="space-y-6 animate-fade-in">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              <div className="lg:col-span-1">
-                <HotelFilters filters={hotelFilters} onChange={setHotelFilters} />
-              </div>
-              
-              <div className="lg:col-span-3 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold">
-                    Отели Сочи {filteredHotels.length > 0 && `(${filteredHotels.length})`}
-                  </h2>
-                  <div className="md:hidden">
-                    <HotelFilters filters={hotelFilters} onChange={setHotelFilters} />
-                  </div>
-                </div>
-
-                {filteredHotels.map((hotel, index) => (
-                  <Card 
-                    key={hotel.id} 
-                    className="overflow-hidden hover-scale border-0 shadow-lg bg-white"
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <div className="flex flex-col md:flex-row">
-                      <div className="relative w-full md:w-64 h-48 md:h-auto overflow-hidden">
-                        <img 
-                          src={hotel.image} 
-                          alt={hotel.name}
-                          className="w-full h-full object-cover"
-                        />
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          className={`absolute top-3 right-3 backdrop-blur-sm ${
-                            favorites.includes(hotel.id)
-                              ? 'bg-red-500 hover:bg-red-600 text-white'
-                              : 'bg-white/20 hover:bg-white/30 text-white'
-                          }`}
-                          onClick={() => toggleFavorite(hotel.id)}
-                        >
-                          <Icon name="Heart" size={20} className={favorites.includes(hotel.id) ? 'fill-white' : ''} />
-                        </Button>
-                      </div>
-                      <CardContent className="flex-1 p-6">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <h3 className="font-bold text-lg mb-1">{hotel.name}</h3>
-                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                              <Icon name="MapPin" size={14} />
-                              {hotel.location}
-                            </div>
-                          </div>
-                          <Badge className="bg-gradient-to-br from-blue-500 to-purple-600 text-white border-0">
-                            <Icon name="Star" size={14} className="mr-1" />
-                            {hotel.rating}
-                          </Badge>
-                        </div>
-                        <div className="flex flex-wrap gap-2 my-3">
-                          {hotel.amenitiesDisplay.map((amenity) => (
-                            <Badge key={amenity} variant="outline" className="text-xs">
-                              {amenity}
-                            </Badge>
-                          ))}
-                        </div>
-                        <div className="flex items-end justify-between mt-4">
-                          <div>
-                            <div className="text-2xl font-bold gradient-text">
-                              {hotel.price.toLocaleString('ru-RU')} ₽
-                            </div>
-                            <div className="text-xs text-gray-500">за ночь</div>
-                          </div>
-                          <BookingDialog hotel={hotel} />
-                        </div>
-                      </CardContent>
-                    </div>
-                  </Card>
-                ))}
-
-                {filteredHotels.length === 0 && (
-                  <div className="text-center py-12">
-                    <Icon name="SearchX" size={48} className="mx-auto mb-4 text-gray-400" />
-                    <h3 className="text-xl font-bold mb-2">Отели не найдены</h3>
-                    <p className="text-gray-600 mb-4">Попробуйте изменить фильтры или поисковый запрос</p>
-                    <Button 
-                      onClick={() => setHotelFilters({ priceRange: [0, 50000], minRating: 0, amenities: [] })}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredAttractions.map(attraction => (
+                <Card key={attraction.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white/90 backdrop-blur-sm border-0">
+                  <div className="relative h-56 overflow-hidden">
+                    <img 
+                      src={attraction.image} 
+                      alt={attraction.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => toggleFavorite(attraction.id)}
+                      className="absolute top-3 right-3 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full w-10 h-10 p-0"
                     >
-                      Сбросить фильтры
+                      <Icon 
+                        name="Heart" 
+                        size={18} 
+                        className={isFavorite(attraction.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}
+                      />
                     </Button>
+                    <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                      <Icon name="Star" size={14} className="text-yellow-500 fill-yellow-500" />
+                      <span className="font-semibold text-sm">{attraction.rating}</span>
+                    </div>
                   </div>
-                )}
-              </div>
+                  <CardContent className="p-5">
+                    <h3 className="font-bold text-lg mb-2 text-gray-800">{attraction.name}</h3>
+                    <p className="text-gray-600 text-sm mb-3">{attraction.description}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {attraction.tags.map(tag => (
+                        <Badge key={tag} variant="secondary" className="bg-purple-100 text-purple-700 hover:bg-purple-200">
+                          {tag}
+                        </Badge>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </TabsContent>
 
-          <TabsContent value="map" className="animate-fade-in">
-            <Card className="border-0 shadow-lg overflow-hidden">
-              <YandexMap locations={mapLocations} onLocationClick={(location) => {
-                console.log('Clicked:', location);
-                setActiveTab('explore');
-                const attraction = attractions.find(a => a.id === location.id);
-                if (attraction) {
-                  setSelectedCategory(attraction.category);
-                }
-              }} />
-            </Card>
+          <TabsContent value="hotels" className="space-y-6">
+            <HotelFilters filters={hotelFilters} onFiltersChange={setHotelFilters} />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredHotels.map(hotel => (
+                <Card key={hotel.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white/90 backdrop-blur-sm border-0">
+                  <div className="relative h-56 overflow-hidden">
+                    <img 
+                      src={hotel.image} 
+                      alt={hotel.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => toggleFavorite(hotel.id)}
+                      className="absolute top-3 right-3 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full w-10 h-10 p-0"
+                    >
+                      <Icon 
+                        name="Heart" 
+                        size={18} 
+                        className={isFavorite(hotel.id) ? 'fill-red-500 text-red-500' : 'text-gray-600'}
+                      />
+                    </Button>
+                    <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                      <Icon name="Star" size={14} className="text-yellow-500 fill-yellow-500" />
+                      <span className="font-semibold text-sm">{hotel.rating}</span>
+                    </div>
+                  </div>
+                  <CardContent className="p-5">
+                    <h3 className="font-bold text-lg mb-1 text-gray-800">{hotel.name}</h3>
+                    <p className="text-gray-600 text-sm mb-3 flex items-center gap-1">
+                      <Icon name="MapPin" size={14} />
+                      {hotel.location}
+                    </p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {hotel.amenitiesDisplay.slice(0, 3).map(amenity => (
+                        <Badge key={amenity} variant="outline" className="text-xs">
+                          {amenity}
+                        </Badge>
+                      ))}
+                      {hotel.amenitiesDisplay.length > 3 && (
+                        <Badge variant="outline" className="text-xs">
+                          +{hotel.amenitiesDisplay.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-purple-600">
+                          {hotel.price.toLocaleString('ru-RU')} ₽
+                        </div>
+                        <div className="text-xs text-gray-500">за ночь</div>
+                      </div>
+                      <BookingDialog hotel={hotel} onBook={addBooking}>
+                        <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 text-white">
+                          Забронировать
+                        </Button>
+                      </BookingDialog>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {filteredHotels.length === 0 && (
+              <div className="text-center py-12">
+                <Icon name="SearchX" size={48} className="mx-auto text-gray-400 mb-4" />
+                <h3 className="text-xl font-semibold text-gray-700 mb-2">Отели не найдены</h3>
+                <p className="text-gray-500">Попробуйте изменить фильтры или поисковый запрос</p>
+              </div>
+            )}
           </TabsContent>
 
-          <TabsContent value="profile" className="space-y-6 animate-fade-in">
-            <Card className="border-0 shadow-lg bg-white">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-600 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">
-                    ТГ
-                  </div>
-                  <div>
-                    <h2 className="text-2xl font-bold mb-1">Турист Гид</h2>
-                    <p className="text-gray-600">turист@example.com</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl">
-                    <div className="text-2xl font-bold gradient-text">12</div>
-                    <div className="text-sm text-gray-600">Посещено</div>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-pink-50 rounded-xl">
-                    <div className="text-2xl font-bold gradient-text">{favorites.length}</div>
-                    <div className="text-sm text-gray-600">Избранное</div>
-                  </div>
-                  <div className="text-center p-4 bg-gradient-to-br from-green-50 to-blue-50 rounded-xl">
-                    <div className="text-2xl font-bold gradient-text">3</div>
-                    <div className="text-sm text-gray-600">Бронирования</div>
-                  </div>
-                </div>
-                <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start h-auto py-3 bg-white hover-scale">
-                    <Icon name="History" size={20} className="mr-3" />
-                    История посещений
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start h-auto py-3 bg-white hover-scale">
-                    <Icon name="Calendar" size={20} className="mr-3" />
-                    Мои бронирования
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start h-auto py-3 bg-white hover-scale">
-                    <Icon name="Settings" size={20} className="mr-3" />
-                    Настройки предпочтений
-                  </Button>
-                  <Button variant="outline" className="w-full justify-start h-auto py-3 bg-white hover-scale">
-                    <Icon name="Bell" size={20} className="mr-3" />
-                    Уведомления
-                  </Button>
+          <TabsContent value="map" className="space-y-6">
+            <Card className="overflow-hidden bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+              <CardContent className="p-0">
+                <div className="h-[600px]">
+                  <YandexMap locations={mapLocations} />
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
 
-            {favoriteAttractions.length > 0 && (
-              <Card className="border-0 shadow-lg bg-white">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-bold mb-4">Избранные места</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {favoriteAttractions.map((attraction) => (
-                      <Card 
-                        key={attraction.id} 
-                        className="overflow-hidden hover-scale border cursor-pointer"
-                      >
-                        <div className="relative h-32 overflow-hidden">
-                          <img 
-                            src={attraction.image} 
-                            alt={attraction.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <CardContent className="p-3">
-                          <h4 className="font-bold text-sm mb-1">{attraction.name}</h4>
-                          <p className="text-xs text-gray-600">{attraction.description}</p>
-                        </CardContent>
-                      </Card>
-                    ))}
+          <TabsContent value="favorites" className="space-y-6">
+            {!user ? (
+              <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+                <CardContent className="p-12 text-center">
+                  <Icon name="Heart" size={64} className="mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">Войдите, чтобы сохранять избранное</h3>
+                  <p className="text-gray-600 mb-6">Создайте аккаунт или войдите, чтобы сохранять любимые места и отели</p>
+                  <div className="flex gap-3 justify-center">
+                    <Button onClick={() => navigate('/login')} variant="outline">
+                      Войти
+                    </Button>
+                    <Button onClick={() => navigate('/register')} className="bg-gradient-to-r from-purple-500 to-pink-500 text-white">
+                      Зарегистрироваться
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
+            ) : favorites.length === 0 ? (
+              <Card className="bg-white/90 backdrop-blur-sm border-0 shadow-xl">
+                <CardContent className="p-12 text-center">
+                  <Icon name="Heart" size={64} className="mx-auto text-gray-300 mb-4" />
+                  <h3 className="text-2xl font-bold text-gray-800 mb-2">Пока ничего не добавлено</h3>
+                  <p className="text-gray-600">Добавляйте места и отели в избранное, нажимая на иконку сердца</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {favoriteAttractions.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Избранные места</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {favoriteAttractions.map(attraction => (
+                        <Card key={attraction.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white/90 backdrop-blur-sm border-0">
+                          <div className="relative h-56 overflow-hidden">
+                            <img 
+                              src={attraction.image} 
+                              alt={attraction.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => toggleFavorite(attraction.id)}
+                              className="absolute top-3 right-3 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full w-10 h-10 p-0"
+                            >
+                              <Icon 
+                                name="Heart" 
+                                size={18} 
+                                className="fill-red-500 text-red-500"
+                              />
+                            </Button>
+                            <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                              <Icon name="Star" size={14} className="text-yellow-500 fill-yellow-500" />
+                              <span className="font-semibold text-sm">{attraction.rating}</span>
+                            </div>
+                          </div>
+                          <CardContent className="p-5">
+                            <h3 className="font-bold text-lg mb-2 text-gray-800">{attraction.name}</h3>
+                            <p className="text-gray-600 text-sm mb-3">{attraction.description}</p>
+                            <div className="flex flex-wrap gap-2">
+                              {attraction.tags.map(tag => (
+                                <Badge key={tag} variant="secondary" className="bg-purple-100 text-purple-700 hover:bg-purple-200">
+                                  {tag}
+                                </Badge>
+                              ))}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {favoriteHotels.length > 0 && (
+                  <div>
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Избранные отели</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {favoriteHotels.map(hotel => (
+                        <Card key={hotel.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white/90 backdrop-blur-sm border-0">
+                          <div className="relative h-56 overflow-hidden">
+                            <img 
+                              src={hotel.image} 
+                              alt={hotel.name}
+                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                            />
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => toggleFavorite(hotel.id)}
+                              className="absolute top-3 right-3 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full w-10 h-10 p-0"
+                            >
+                              <Icon 
+                                name="Heart" 
+                                size={18} 
+                                className="fill-red-500 text-red-500"
+                              />
+                            </Button>
+                            <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-full">
+                              <Icon name="Star" size={14} className="text-yellow-500 fill-yellow-500" />
+                              <span className="font-semibold text-sm">{hotel.rating}</span>
+                            </div>
+                          </div>
+                          <CardContent className="p-5">
+                            <h3 className="font-bold text-lg mb-1 text-gray-800">{hotel.name}</h3>
+                            <p className="text-gray-600 text-sm mb-3 flex items-center gap-1">
+                              <Icon name="MapPin" size={14} />
+                              {hotel.location}
+                            </p>
+                            <div className="flex flex-wrap gap-2 mb-4">
+                              {hotel.amenitiesDisplay.slice(0, 3).map(amenity => (
+                                <Badge key={amenity} variant="outline" className="text-xs">
+                                  {amenity}
+                                </Badge>
+                              ))}
+                              {hotel.amenitiesDisplay.length > 3 && (
+                                <Badge variant="outline" className="text-xs">
+                                  +{hotel.amenitiesDisplay.length - 3}
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <div className="text-2xl font-bold text-purple-600">
+                                  {hotel.price.toLocaleString('ru-RU')} ₽
+                                </div>
+                                <div className="text-xs text-gray-500">за ночь</div>
+                              </div>
+                              <BookingDialog hotel={hotel} onBook={addBooking}>
+                                <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 text-white">
+                                  Забронировать
+                                </Button>
+                              </BookingDialog>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
         </Tabs>
