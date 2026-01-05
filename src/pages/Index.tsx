@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Icon from '@/components/ui/icon';
 import YandexMap from '@/components/YandexMap';
-import HotelFilters, { HotelFilters as HotelFiltersType } from '@/components/HotelFilters';
+import HotelFiltersComponent, { HotelFilters as HotelFiltersType } from '@/components/HotelFilters';
 import BookingDialog from '@/components/BookingDialog';
 import { hotels } from '@/data/hotels';
 import { useAuth } from '@/contexts/AuthContext';
@@ -328,7 +328,7 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="hotels" className="space-y-6">
-            <HotelFilters filters={hotelFilters} onFiltersChange={setHotelFilters} />
+            <HotelFiltersComponent filters={hotelFilters} onChange={setHotelFilters} />
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredHotels.map(hotel => (
