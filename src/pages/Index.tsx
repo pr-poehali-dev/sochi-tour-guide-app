@@ -1,14 +1,24 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import YandexMap from '@/components/YandexMap';
+import HotelFilters, { HotelFilters as HotelFiltersType } from '@/components/HotelFilters';
+import BookingDialog from '@/components/BookingDialog';
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('explore');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [favorites, setFavorites] = useState<number[]>([]);
+  const [hotelFilters, setHotelFilters] = useState<HotelFiltersType>({
+    priceRange: [0, 50000],
+    minRating: 0,
+    amenities: [],
+  });
 
   const categories = [
     { id: 'all', name: 'Все', icon: 'Sparkles' },
@@ -27,6 +37,7 @@ const Index = () => {
       image: 'https://images.unsplash.com/photo-1464207687429-7505649dae38',
       description: 'Наследие Олимпиады-2014',
       tags: ['Спорт', 'История', 'Архитектура'],
+      coords: [43.402981, 39.955781] as [number, number],
     },
     {
       id: 2,
@@ -36,6 +47,7 @@ const Index = () => {
       image: 'https://images.unsplash.com/photo-1605540436563-5bca919ae766',
       description: 'Горнолыжный курорт',
       tags: ['Горы', 'Активный отдых', 'Природа'],
+      coords: [43.739022, 40.314606] as [number, number],
     },
     {
       id: 3,
@@ -45,6 +57,7 @@ const Index = () => {
       image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e',
       description: 'Лучший городской пляж',
       tags: ['Море', 'Отдых', 'Семья'],
+      coords: [43.588947, 39.720952] as [number, number],
     },
     {
       id: 4,
@@ -54,6 +67,7 @@ const Index = () => {
       image: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9',
       description: 'Живописные водопады',
       tags: ['Природа', 'Треккинг', 'Фото'],
+      coords: [43.552778, 39.827222] as [number, number],
     },
     {
       id: 5,
@@ -63,6 +77,7 @@ const Index = () => {
       image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4',
       description: 'Экстрим и панорамы',
       tags: ['Развлечения', 'Адреналин', 'Виды'],
+      coords: [43.564167, 39.956389] as [number, number],
     },
     {
       id: 6,
@@ -72,6 +87,7 @@ const Index = () => {
       image: 'https://images.unsplash.com/photo-1558160074-4d7d8bdf4256',
       description: 'Северная чайная столица',
       tags: ['Чай', 'Традиции', 'Гастрономия'],
+      coords: [43.668611, 39.665833] as [number, number],
     },
   ];
 
@@ -83,7 +99,8 @@ const Index = () => {
       price: 12500,
       image: 'https://images.unsplash.com/photo-1566073771259-6a8506099945',
       location: 'Адлерский район',
-      amenities: ['Wi-Fi', 'Бассейн', 'СПА', 'Ресторан'],
+      amenities: ['wifi', 'pool', 'spa', 'restaurant'],
+      amenitiesDisplay: ['Wi-Fi', 'Бассейн', 'СПА', 'Ресторан'],
     },
     {
       id: 2,
@@ -92,7 +109,8 @@ const Index = () => {
       price: 15000,
       image: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb',
       location: 'Центральный район',
-      amenities: ['Wi-Fi', 'Пляж', 'Фитнес', 'Парковка'],
+      amenities: ['wifi', 'beach', 'fitness', 'parking'],
+      amenitiesDisplay: ['Wi-Fi', 'Пляж', 'Фитнес', 'Парковка'],
     },
     {
       id: 3,
@@ -101,13 +119,92 @@ const Index = () => {
       price: 10000,
       image: 'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa',
       location: 'Олимпийский парк',
-      amenities: ['Wi-Fi', 'Бассейн', 'Бар', 'Конференц-зал'],
+      amenities: ['wifi', 'pool', 'bar'],
+      amenitiesDisplay: ['Wi-Fi', 'Бассейн', 'Бар'],
+    },
+    {
+      id: 4,
+      name: 'Pullman Sochi Centre',
+      rating: 4.6,
+      price: 8500,
+      image: 'https://images.unsplash.com/photo-1455587734955-081b22074882',
+      location: 'Центральный район',
+      amenities: ['wifi', 'restaurant', 'parking', 'fitness'],
+      amenitiesDisplay: ['Wi-Fi', 'Ресторан', 'Парковка', 'Фитнес'],
+    },
+    {
+      id: 5,
+      name: 'Mercure Sochi Centre',
+      rating: 4.5,
+      price: 7000,
+      image: 'https://images.unsplash.com/photo-1445019980597-93fa8acb246c',
+      location: 'Центральный район',
+      amenities: ['wifi', 'bar', 'parking'],
+      amenitiesDisplay: ['Wi-Fi', 'Бар', 'Парковка'],
+    },
+    {
+      id: 6,
+      name: 'Bogatyr Hotel',
+      rating: 4.8,
+      price: 14000,
+      image: 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461',
+      location: 'Адлерский район',
+      amenities: ['wifi', 'pool', 'spa', 'beach', 'restaurant'],
+      amenitiesDisplay: ['Wi-Fi', 'Бассейн', 'СПА', 'Пляж', 'Ресторан'],
     },
   ];
 
-  const filteredAttractions = selectedCategory === 'all' 
-    ? attractions 
-    : attractions.filter(a => a.category === selectedCategory);
+  const filteredAttractions = useMemo(() => {
+    let results = attractions;
+    
+    if (selectedCategory !== 'all') {
+      results = results.filter(a => a.category === selectedCategory);
+    }
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      results = results.filter(a => 
+        a.name.toLowerCase().includes(query) ||
+        a.description.toLowerCase().includes(query) ||
+        a.tags.some(tag => tag.toLowerCase().includes(query))
+      );
+    }
+    
+    return results;
+  }, [selectedCategory, searchQuery]);
+
+  const filteredHotels = useMemo(() => {
+    return hotels.filter(hotel => {
+      const matchesPrice = hotel.price >= hotelFilters.priceRange[0] && 
+                          hotel.price <= hotelFilters.priceRange[1];
+      const matchesRating = hotel.rating >= hotelFilters.minRating;
+      const matchesAmenities = hotelFilters.amenities.length === 0 || 
+                               hotelFilters.amenities.every(a => hotel.amenities.includes(a));
+      const matchesSearch = !searchQuery.trim() || 
+                           hotel.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           hotel.location.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      return matchesPrice && matchesRating && matchesAmenities && matchesSearch;
+    });
+  }, [hotelFilters, searchQuery]);
+
+  const favoriteAttractions = useMemo(() => {
+    return attractions.filter(a => favorites.includes(a.id));
+  }, [favorites]);
+
+  const toggleFavorite = (id: number) => {
+    setFavorites(prev => 
+      prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]
+    );
+  };
+
+  const mapLocations = attractions.map(a => ({
+    id: a.id,
+    name: a.name,
+    coords: a.coords,
+    description: a.description,
+    category: a.category,
+  }));
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
@@ -123,7 +220,12 @@ const Index = () => {
                 <p className="text-sm text-white/80">Твой умный путеводитель</p>
               </div>
             </div>
-            <Button variant="ghost" size="icon" className="text-white hover:bg-white/20">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="text-white hover:bg-white/20"
+              onClick={() => setActiveTab('profile')}
+            >
               <Icon name="User" size={24} />
             </Button>
           </div>
@@ -132,6 +234,8 @@ const Index = () => {
             <Input 
               placeholder="Поиск мест, отелей, активностей..." 
               className="pl-10 bg-white/95 backdrop-blur-sm border-0 h-12 rounded-xl"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
         </div>
@@ -155,6 +259,11 @@ const Index = () => {
             <TabsTrigger value="profile" className="flex flex-col items-center gap-1 py-3 data-[state=active]:bg-gradient-to-br data-[state=active]:from-blue-500 data-[state=active]:to-purple-600 data-[state=active]:text-white rounded-lg">
               <Icon name="Heart" size={20} />
               <span className="text-xs">Избранное</span>
+              {favorites.length > 0 && (
+                <Badge className="absolute -top-1 -right-1 bg-red-500 text-white h-5 w-5 flex items-center justify-center p-0 text-xs">
+                  {favorites.length}
+                </Badge>
+              )}
             </TabsTrigger>
           </TabsList>
 
@@ -167,7 +276,7 @@ const Index = () => {
                   Настроить
                 </Button>
               </div>
-              <Card className="bg-gradient-to-br from-orange-400 to-pink-500 text-white border-0 shadow-xl hover-scale">
+              <Card className="bg-gradient-to-br from-orange-400 to-pink-500 text-white border-0 shadow-xl hover-scale cursor-pointer">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
                     <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center flex-shrink-0">
@@ -176,7 +285,12 @@ const Index = () => {
                     <div className="flex-1">
                       <h3 className="font-bold text-lg mb-2">Для любителей активного отдыха</h3>
                       <p className="text-sm text-white/90 mb-3">На основе ваших предпочтений мы подобрали маршрут: Роза Хутор → Агурские водопады → Скайпарк</p>
-                      <Button variant="secondary" size="sm" className="bg-white text-orange-600 hover:bg-white/90">
+                      <Button 
+                        variant="secondary" 
+                        size="sm" 
+                        className="bg-white text-orange-600 hover:bg-white/90"
+                        onClick={() => setActiveTab('map')}
+                      >
                         Посмотреть маршрут
                         <Icon name="ArrowRight" size={16} className="ml-2" />
                       </Button>
@@ -193,10 +307,10 @@ const Index = () => {
                   <Button
                     key={cat.id}
                     variant={selectedCategory === cat.id ? 'default' : 'outline'}
-                    className={`flex items-center gap-2 whitespace-nowrap rounded-xl ${
+                    className={`flex items-center gap-2 whitespace-nowrap rounded-xl transition-all ${
                       selectedCategory === cat.id 
-                        ? 'gradient-bg text-white border-0' 
-                        : 'bg-white hover:bg-gray-50'
+                        ? 'gradient-bg text-white border-0 shadow-lg' 
+                        : 'bg-white hover:bg-gray-50 hover-scale'
                     }`}
                     onClick={() => setSelectedCategory(cat.id)}
                   >
@@ -208,12 +322,26 @@ const Index = () => {
             </section>
 
             <section>
-              <h2 className="text-xl font-bold mb-4">Популярные места</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-bold">
+                  {searchQuery ? `Результаты поиска (${filteredAttractions.length})` : 'Популярные места'}
+                </h2>
+                {searchQuery && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setSearchQuery('')}
+                  >
+                    <Icon name="X" size={16} className="mr-1" />
+                    Очистить
+                  </Button>
+                )}
+              </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredAttractions.map((attraction, index) => (
                   <Card 
                     key={attraction.id} 
-                    className="overflow-hidden hover-scale border-0 shadow-lg bg-white"
+                    className="overflow-hidden hover-scale border-0 shadow-lg bg-white cursor-pointer"
                     style={{ animationDelay: `${index * 0.1}s` }}
                   >
                     <div className="relative h-48 overflow-hidden">
@@ -231,9 +359,14 @@ const Index = () => {
                       <Button 
                         size="icon" 
                         variant="ghost" 
-                        className="absolute top-3 left-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white"
+                        className={`absolute top-3 left-3 backdrop-blur-sm ${
+                          favorites.includes(attraction.id)
+                            ? 'bg-red-500 hover:bg-red-600 text-white'
+                            : 'bg-white/20 hover:bg-white/30 text-white'
+                        }`}
+                        onClick={() => toggleFavorite(attraction.id)}
                       >
-                        <Icon name="Heart" size={20} />
+                        <Icon name="Heart" size={20} className={favorites.includes(attraction.id) ? 'fill-white' : ''} />
                       </Button>
                     </div>
                     <CardContent className="p-4">
@@ -250,20 +383,33 @@ const Index = () => {
                   </Card>
                 ))}
               </div>
+              {filteredAttractions.length === 0 && (
+                <div className="text-center py-12">
+                  <Icon name="SearchX" size={48} className="mx-auto mb-4 text-gray-400" />
+                  <h3 className="text-xl font-bold mb-2">Ничего не найдено</h3>
+                  <p className="text-gray-600">Попробуйте изменить поисковый запрос или фильтры</p>
+                </div>
+              )}
             </section>
           </TabsContent>
 
           <TabsContent value="hotels" className="space-y-6 animate-fade-in">
-            <section>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold">Отели Сочи</h2>
-                <Button variant="outline" size="sm" className="bg-white">
-                  <Icon name="SlidersHorizontal" size={16} className="mr-1" />
-                  Фильтры
-                </Button>
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-1">
+                <HotelFilters filters={hotelFilters} onChange={setHotelFilters} />
               </div>
-              <div className="space-y-4">
-                {hotels.map((hotel, index) => (
+              
+              <div className="lg:col-span-3 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold">
+                    Отели Сочи {filteredHotels.length > 0 && `(${filteredHotels.length})`}
+                  </h2>
+                  <div className="md:hidden">
+                    <HotelFilters filters={hotelFilters} onChange={setHotelFilters} />
+                  </div>
+                </div>
+
+                {filteredHotels.map((hotel, index) => (
                   <Card 
                     key={hotel.id} 
                     className="overflow-hidden hover-scale border-0 shadow-lg bg-white"
@@ -279,9 +425,14 @@ const Index = () => {
                         <Button 
                           size="icon" 
                           variant="ghost" 
-                          className="absolute top-3 right-3 bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white"
+                          className={`absolute top-3 right-3 backdrop-blur-sm ${
+                            favorites.includes(hotel.id)
+                              ? 'bg-red-500 hover:bg-red-600 text-white'
+                              : 'bg-white/20 hover:bg-white/30 text-white'
+                          }`}
+                          onClick={() => toggleFavorite(hotel.id)}
                         >
-                          <Icon name="Heart" size={20} />
+                          <Icon name="Heart" size={20} className={favorites.includes(hotel.id) ? 'fill-white' : ''} />
                         </Button>
                       </div>
                       <CardContent className="flex-1 p-6">
@@ -299,7 +450,7 @@ const Index = () => {
                           </Badge>
                         </div>
                         <div className="flex flex-wrap gap-2 my-3">
-                          {hotel.amenities.map((amenity) => (
+                          {hotel.amenitiesDisplay.map((amenity) => (
                             <Badge key={amenity} variant="outline" className="text-xs">
                               {amenity}
                             </Badge>
@@ -312,32 +463,39 @@ const Index = () => {
                             </div>
                             <div className="text-xs text-gray-500">за ночь</div>
                           </div>
-                          <Button className="gradient-bg text-white border-0">
-                            Забронировать
-                            <Icon name="ArrowRight" size={16} className="ml-2" />
-                          </Button>
+                          <BookingDialog hotel={hotel} />
                         </div>
                       </CardContent>
                     </div>
                   </Card>
                 ))}
+
+                {filteredHotels.length === 0 && (
+                  <div className="text-center py-12">
+                    <Icon name="SearchX" size={48} className="mx-auto mb-4 text-gray-400" />
+                    <h3 className="text-xl font-bold mb-2">Отели не найдены</h3>
+                    <p className="text-gray-600 mb-4">Попробуйте изменить фильтры или поисковый запрос</p>
+                    <Button 
+                      onClick={() => setHotelFilters({ priceRange: [0, 50000], minRating: 0, amenities: [] })}
+                    >
+                      Сбросить фильтры
+                    </Button>
+                  </div>
+                )}
               </div>
-            </section>
+            </div>
           </TabsContent>
 
           <TabsContent value="map" className="animate-fade-in">
             <Card className="border-0 shadow-lg overflow-hidden">
-              <div className="relative w-full h-[600px] bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
-                <div className="text-center">
-                  <Icon name="Map" size={64} className="mx-auto mb-4 text-primary" />
-                  <h3 className="text-2xl font-bold mb-2">Интерактивная карта</h3>
-                  <p className="text-gray-600 mb-4">Здесь будет интерактивная карта Сочи с метками</p>
-                  <Button className="gradient-bg text-white">
-                    <Icon name="Navigation" size={16} className="mr-2" />
-                    Включить геолокацию
-                  </Button>
-                </div>
-              </div>
+              <YandexMap locations={mapLocations} onLocationClick={(location) => {
+                console.log('Clicked:', location);
+                setActiveTab('explore');
+                const attraction = attractions.find(a => a.id === location.id);
+                if (attraction) {
+                  setSelectedCategory(attraction.category);
+                }
+              }} />
             </Card>
           </TabsContent>
 
@@ -359,7 +517,7 @@ const Index = () => {
                     <div className="text-sm text-gray-600">Посещено</div>
                   </div>
                   <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-pink-50 rounded-xl">
-                    <div className="text-2xl font-bold gradient-text">8</div>
+                    <div className="text-2xl font-bold gradient-text">{favorites.length}</div>
                     <div className="text-sm text-gray-600">Избранное</div>
                   </div>
                   <div className="text-center p-4 bg-gradient-to-br from-green-50 to-blue-50 rounded-xl">
@@ -368,25 +526,53 @@ const Index = () => {
                   </div>
                 </div>
                 <div className="space-y-3">
-                  <Button variant="outline" className="w-full justify-start h-auto py-3 bg-white">
+                  <Button variant="outline" className="w-full justify-start h-auto py-3 bg-white hover-scale">
                     <Icon name="History" size={20} className="mr-3" />
                     История посещений
                   </Button>
-                  <Button variant="outline" className="w-full justify-start h-auto py-3 bg-white">
+                  <Button variant="outline" className="w-full justify-start h-auto py-3 bg-white hover-scale">
                     <Icon name="Calendar" size={20} className="mr-3" />
                     Мои бронирования
                   </Button>
-                  <Button variant="outline" className="w-full justify-start h-auto py-3 bg-white">
+                  <Button variant="outline" className="w-full justify-start h-auto py-3 bg-white hover-scale">
                     <Icon name="Settings" size={20} className="mr-3" />
                     Настройки предпочтений
                   </Button>
-                  <Button variant="outline" className="w-full justify-start h-auto py-3 bg-white">
+                  <Button variant="outline" className="w-full justify-start h-auto py-3 bg-white hover-scale">
                     <Icon name="Bell" size={20} className="mr-3" />
                     Уведомления
                   </Button>
                 </div>
               </CardContent>
             </Card>
+
+            {favoriteAttractions.length > 0 && (
+              <Card className="border-0 shadow-lg bg-white">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-bold mb-4">Избранные места</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {favoriteAttractions.map((attraction) => (
+                      <Card 
+                        key={attraction.id} 
+                        className="overflow-hidden hover-scale border cursor-pointer"
+                      >
+                        <div className="relative h-32 overflow-hidden">
+                          <img 
+                            src={attraction.image} 
+                            alt={attraction.name}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <CardContent className="p-3">
+                          <h4 className="font-bold text-sm mb-1">{attraction.name}</h4>
+                          <p className="text-xs text-gray-600">{attraction.description}</p>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
       </main>
