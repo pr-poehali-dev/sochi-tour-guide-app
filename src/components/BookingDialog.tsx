@@ -144,15 +144,16 @@ const BookingDialog = ({ hotel, children }: BookingDialogProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {children || (
-          <Button className="gradient-bg text-white border-0">
-            Забронировать
-            <Icon name="ArrowRight" size={16} className="ml-2" />
-          </Button>
-        )}
-      </DialogTrigger>
+    <>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          {children || (
+            <Button className="gradient-bg text-white border-0">
+              Забронировать
+              <Icon name="ArrowRight" size={16} className="ml-2" />
+            </Button>
+          )}
+        </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">Бронирование отеля</DialogTitle>
@@ -332,7 +333,7 @@ const BookingDialog = ({ hotel, children }: BookingDialogProps) => {
       </DialogContent>
     </Dialog>
 
-      <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
+    <AlertDialog open={confirmDialogOpen} onOpenChange={setConfirmDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <div className="flex items-center justify-center mb-4">
