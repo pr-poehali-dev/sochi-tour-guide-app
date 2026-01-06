@@ -7,11 +7,14 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { BookingProvider } from "@/contexts/BookingContext";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
+import { initDemoData } from "@/utils/initDemoData";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+
+initDemoData();
 
 const queryClient = new QueryClient();
 
