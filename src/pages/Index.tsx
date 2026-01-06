@@ -249,7 +249,7 @@ const Index = () => {
                       {user.name}
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-72">
+                  <DropdownMenuContent align="end" className="w-80">
                     <DropdownMenuLabel>Мой аккаунт</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => navigate('/profile')}>
@@ -260,18 +260,26 @@ const Index = () => {
                       <Icon name="Calendar" size={16} className="mr-2" />
                       Мои бронирования
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setActiveTab('favorites')}>
+                      <Icon name="Heart" size={16} className="mr-2" />
+                      Избранное
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuLabel className="text-sm font-medium">Контакты и поддержка</DropdownMenuLabel>
-                    <div className="px-2 py-3 space-y-2">
+                    <div className="px-2 py-3 space-y-2.5">
+                      <div className="flex items-start gap-2 text-sm text-gray-600">
+                        <Icon name="MapPin" size={16} className="text-purple-500 mt-0.5 flex-shrink-0" />
+                        <span>г. Сочи, ул. Войкова</span>
+                      </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Icon name="Phone" size={16} className="text-purple-500" />
+                        <Icon name="Phone" size={16} className="text-purple-500 flex-shrink-0" />
                         <a href="tel:+79269384237" className="hover:text-purple-600">
                           +7 (926) 938-42-37
                         </a>
                       </div>
                       <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Icon name="Mail" size={16} className="text-purple-500" />
-                        <a href="mailto:support.sochi@gmail.com" className="hover:text-purple-600">
+                        <Icon name="Mail" size={16} className="text-purple-500 flex-shrink-0" />
+                        <a href="mailto:support.sochi@gmail.com" className="hover:text-purple-600 break-all">
                           support.sochi@gmail.com
                         </a>
                       </div>
