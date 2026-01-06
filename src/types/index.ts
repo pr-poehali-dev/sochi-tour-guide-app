@@ -33,17 +33,24 @@ export interface Hotel {
   rooms?: HotelRoom[];
   reviews?: Review[];
   cancelPolicy?: string;
+  fullDescription?: string;
+  highlights?: string[];
+  services?: string[];
+  nearbyAttractions?: string[];
+  checkInTime?: string;
+  checkOutTime?: string;
+  cancellationPolicy?: string;
 }
 
 export interface HotelRoom {
-  id: string;
-  type: 'standard' | 'deluxe' | 'suite' | 'family';
-  name: string;
-  price: number;
-  area: number;
-  capacity: number;
-  amenities: string[];
-  images: string[];
+  id?: string;
+  type: string;
+  name?: string;
+  price?: number;
+  area?: number;
+  capacity?: number;
+  amenities?: string[];
+  images?: string[];
   description: string;
 }
 
@@ -98,4 +105,9 @@ export interface Attraction {
   fullDescription?: string;
   workingHours?: string;
   ticketPrice?: string;
+  highlights?: string[];
+  bestTime?: string;
+  duration?: string;
+  price?: string;
+  tips?: string[];
 }

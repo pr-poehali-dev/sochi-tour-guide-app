@@ -17,11 +17,14 @@ import Icon from '@/components/ui/icon';
 import YandexMap from '@/components/YandexMap';
 import HotelFiltersComponent, { HotelFilters as HotelFiltersType } from '@/components/HotelFilters';
 import BookingDialog from '@/components/BookingDialog';
+import AttractionDetailDialog from '@/components/AttractionDetailDialog';
+import HotelDetailDialog from '@/components/HotelDetailDialog';
 import { hotels } from '@/data/hotels';
 import { attractions } from '@/data/attractions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { useBooking } from '@/contexts/BookingContext';
+import type { Attraction, Hotel } from '@/types';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -40,6 +43,10 @@ const Index = () => {
     districts: [],
     types: [],
   });
+  const [selectedAttraction, setSelectedAttraction] = useState<Attraction | null>(null);
+  const [selectedHotel, setSelectedHotel] = useState<Hotel | null>(null);
+  const [attractionDialogOpen, setAttractionDialogOpen] = useState(false);
+  const [hotelDialogOpen, setHotelDialogOpen] = useState(false);
 
   const categories = [
     { id: 'all', name: 'Все', icon: 'Sparkles' },
@@ -413,7 +420,14 @@ const Index = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredAttractions.map(attraction => (
-                <Card key={attraction.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white/90 backdrop-blur-sm border-0">
+                <Card 
+                  key={attraction.id} 
+                  className="group overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white/90 backdrop-blur-sm border-0 cursor-pointer"
+                  onClick={() => {
+                    setSelectedAttraction(attraction);
+                    setAttractionDialogOpen(true);
+                  }}
+                >
                   <div className="relative h-56 overflow-hidden">
                     <img 
                       src={attraction.image} 
@@ -423,7 +437,10 @@ const Index = () => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => toggleFavorite(attraction.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(attraction.id);
+                      }}
                       className="absolute top-3 right-3 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full w-10 h-10 p-0"
                     >
                       <Icon 
@@ -458,7 +475,14 @@ const Index = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredHotels.map(hotel => (
-                <Card key={hotel.id} className="group overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white/90 backdrop-blur-sm border-0">
+                <Card 
+                  key={hotel.id} 
+                  className="group overflow-hidden hover:shadow-2xl transition-all duration-300 bg-white/90 backdrop-blur-sm border-0 cursor-pointer"
+                  onClick={() => {
+                    setSelectedHotel(hotel);
+                    setHotelDialogOpen(true);
+                  }}
+                >
                   <div className="relative h-56 overflow-hidden">
                     <img 
                       src={hotel.image} 
@@ -468,7 +492,10 @@ const Index = () => {
                     <Button
                       size="sm"
                       variant="ghost"
-                      onClick={() => toggleFavorite(hotel.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(hotel.id);
+                      }}
                       className="absolute top-3 right-3 bg-white/90 hover:bg-white backdrop-blur-sm rounded-full w-10 h-10 p-0"
                     >
                       <Icon 
@@ -508,7 +535,10 @@ const Index = () => {
                         <div className="text-xs text-gray-500">за ночь</div>
                       </div>
                       <BookingDialog hotel={hotel} onBook={addBooking}>
-                        <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 text-white">
+                        <Button 
+                          className="bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90 text-white"
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           Забронировать
                         </Button>
                       </BookingDialog>
@@ -718,6 +748,18 @@ const Index = () => {
           </TabsContent>
         </Tabs>
       </main>
+
+      {/* Диалоги детальной информации */}
+      <AttractionDetailDialog 
+        attraction={selectedAttraction}
+        open={attractionDialogOpen}
+        onOpenChange={setAttractionDialogOpen}
+      />
+      <HotelDetailDialog 
+        hotel={selectedHotel}
+        open={hotelDialogOpen}
+        onOpenChange={setHotelDialogOpen}
+      />
     </div>
   );
 };
