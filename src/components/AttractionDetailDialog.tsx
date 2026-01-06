@@ -147,11 +147,33 @@ const AttractionDetailDialog = ({ attraction, open, onOpenChange }: AttractionDe
 
           {/* Кнопки действий */}
           <div className="flex gap-3">
-            <Button className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90">
+            <Button 
+              className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-90"
+              onClick={() => {
+                const [lat, lng] = attraction.coordinates;
+                window.open(`https://yandex.ru/maps/?pt=${lng},${lat}&z=15&l=map`, '_blank');
+              }}
+            >
               <Icon name="Navigation" size={18} className="mr-2" />
               Показать на карте
             </Button>
-            <Button variant="outline" className="flex-1">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => {
+                const shareData = {
+                  title: attraction.name,
+                  text: `${attraction.name} - ${attraction.description}`,
+                  url: window.location.href
+                };
+                if (navigator.share) {
+                  navigator.share(shareData);
+                } else {
+                  navigator.clipboard.writeText(`${attraction.name}\n${attraction.description}\n${window.location.href}`);
+                  alert('Ссылка скопирована!');
+                }
+              }}
+            >
               <Icon name="Share2" size={18} className="mr-2" />
               Поделиться
             </Button>

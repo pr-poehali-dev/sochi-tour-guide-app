@@ -209,11 +209,34 @@ const HotelDetailDialog = ({ hotel, open, onOpenChange }: HotelDetailDialogProps
 
           {/* Кнопки действий */}
           <div className="flex gap-3">
-            <Button variant="outline" className="flex-1">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => {
+                const [lat, lng] = hotel.coordinates;
+                window.open(`https://yandex.ru/maps/?pt=${lng},${lat}&z=15&l=map`, '_blank');
+              }}
+            >
               <Icon name="Navigation" size={18} className="mr-2" />
               Показать на карте
             </Button>
-            <Button variant="outline" className="flex-1">
+            <Button 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => {
+                const shareData = {
+                  title: hotel.name,
+                  text: `${hotel.name} - ${hotel.location}\nОт ${hotel.price.toLocaleString('ru-RU')}₽ за ночь`,
+                  url: window.location.href
+                };
+                if (navigator.share) {
+                  navigator.share(shareData);
+                } else {
+                  navigator.clipboard.writeText(`${hotel.name}\n${hotel.location}\nОт ${hotel.price.toLocaleString('ru-RU')}₽ за ночь\n${window.location.href}`);
+                  alert('Ссылка скопирована!');
+                }
+              }}
+            >
               <Icon name="Share2" size={18} className="mr-2" />
               Поделиться
             </Button>
