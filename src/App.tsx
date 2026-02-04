@@ -12,6 +12,8 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Profile from "./pages/Profile";
+import RoutesPage from "./pages/RoutesPage";
+import RoutesMap from "./pages/Routes";
 import NotFound from "./pages/NotFound";
 
 initDemoData();
@@ -32,6 +34,8 @@ const App = () => (
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/profile" element={<Profile />} />
+                <Route path="/routes" element={<RoutesPage />} />
+                <Route path="/map" element={<RoutesMap />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
