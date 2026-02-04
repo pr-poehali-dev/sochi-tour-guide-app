@@ -37,14 +37,14 @@ const routeExamples: RouteExample[] = [
   {
     from: 'Отель "Азимут"',
     to: 'Пляж "Ривьера"',
-    fromCoords: [43.585, 39.723],
-    toCoords: [43.599, 39.728],
+    fromCoords: [43.5891, 39.7202],
+    toCoords: [43.5994, 39.7255],
   },
   {
     from: 'Отель "Камелия"',
     to: 'Пивной ресторан "Мюнхен"',
-    fromCoords: [43.583, 39.719],
-    toCoords: [43.588, 39.725],
+    fromCoords: [43.5831, 39.7186],
+    toCoords: [43.5885, 39.7241],
   },
 ];
 
@@ -78,6 +78,32 @@ export default function RouteMap() {
     setFrom(example.from);
     setTo(example.to);
     setCurrentRoute(routeKey);
+  };
+
+  const getYandexMapUrl = () => {
+    if (!currentRoute) {
+      return "https://yandex.ru/map-widget/v1/?ll=39.7277%2C43.5855&z=13&l=map";
+    }
+    
+    const example = routeExamples[parseInt(currentRoute.replace('route', '')) - 1];
+    if (!example) {
+      return "https://yandex.ru/map-widget/v1/?ll=39.7277%2C43.5855&z=13&l=map";
+    }
+
+    const fromLat = example.fromCoords[0];
+    const fromLon = example.fromCoords[1];
+    const toLat = example.toCoords[0];
+    const toLon = example.toCoords[1];
+
+    const centerLat = (fromLat + toLat) / 2;
+    const centerLon = (fromLon + toLon) / 2;
+
+    const rttMode = selectedMode === 'walk' ? 'pd' : 
+                    selectedMode === 'car' ? 'auto' : 
+                    selectedMode === 'bike' ? 'bc' : 
+                    selectedMode === 'bus' ? 'mt' : 'auto';
+
+    return `https://yandex.ru/map-widget/v1/?ll=${centerLon},${centerLat}&z=14&l=map&rtext=${fromLat},${fromLon}~${toLat},${toLon}&rtt=${rttMode}`;
   };
 
   const getCurrentRouteOptions = (): RouteOption[] => {
@@ -254,21 +280,93 @@ export default function RouteMap() {
             <Card className="overflow-hidden shadow-lg">
               <div className="relative h-[600px] bg-gradient-to-br from-blue-100 to-green-100">
                 <iframe
-                  src="https://yandex.ru/map-widget/v1/?ll=39.7277%2C43.5855&z=13&l=map"
+                  src={getYandexMapUrl()}
                   width="100%"
                   height="100%"
                   frameBorder="0"
                   className="absolute inset-0"
                   title="Карта Сочи"
+                  key={currentRoute || 'default'}
                 />
-                <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg">
-                  <div className="flex items-center gap-2">
-                    <Icon name="Map" size={20} className="text-purple-500" />
-                    <span className="font-semibold text-gray-900">Карта Сочи</span>
+                {currentRoute && (
+                  <div className="absolute top-4 left-4 right-4 bg-white/95 backdrop-blur-sm px-4 py-3 rounded-lg shadow-lg">
+                    <div className="flex items-start gap-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Icon name="Route" size={20} className="text-purple-500" />
+                          <span className="font-semibold text-gray-900">Маршрут на карте</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                            <span className="text-gray-700 font-medium">{from}</span>
+                          </div>
+                          <Icon name="ArrowRight" size={16} className="text-gray-400" />
+                          <div className="flex items-center gap-1">
+                            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                            <span className="text-gray-700 font-medium">{to}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
+                {!currentRoute && (
+                  <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm px-4 py-2 rounded-lg shadow-lg">
+                    <div className="flex items-center gap-2">
+                      <Icon name="Map" size={20} className="text-purple-500" />
+                      <span className="font-semibold text-gray-900">Карта Сочи</span>
+                    </div>
+                  </div>
+                )}
               </div>
             </Card>
+
+            {/* Легенда маршрута */}
+            {currentRoute && (
+              <>
+                <Card className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-blue-50 border-purple-200">
+                  <div className="flex items-start gap-3">
+                    <Icon name="Info" size={20} className="text-purple-600 mt-0.5 flex-shrink-0" />
+                    <div className="flex-1 text-sm">
+                      <div className="font-semibold text-gray-900 mb-2">Обозначения на карте</div>
+                      <div className="space-y-1.5">
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                          <span className="text-gray-700">Точка отправления (А)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                          <span className="text-gray-700">Точка назначения (Б)</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-0.5 bg-blue-500"></div>
+                          <span className="text-gray-700">Линия маршрута</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
+                
+                <Button
+                  variant="outline"
+                  className="w-full mt-4"
+                  onClick={() => {
+                    const example = routeExamples[parseInt(currentRoute.replace('route', '')) - 1];
+                    if (example) {
+                      const fromLat = example.fromCoords[0];
+                      const fromLon = example.fromCoords[1];
+                      const toLat = example.toCoords[0];
+                      const toLon = example.toCoords[1];
+                      window.open(`https://yandex.ru/maps/?rtext=${fromLat},${fromLon}~${toLat},${toLon}&rtt=auto`, '_blank');
+                    }
+                  }}
+                >
+                  <Icon name="ExternalLink" size={18} className="mr-2" />
+                  Открыть в Яндекс.Картах
+                </Button>
+              </>
+            )}
 
             {/* Информация о доступности */}
             {showAccessible && (
