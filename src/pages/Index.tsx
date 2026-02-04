@@ -246,7 +246,7 @@ const Index = () => {
               <Button
                 variant="outline"
                 className="bg-white/20 border-white/30 hover:bg-white/30 text-white"
-                onClick={() => navigate('/routes')}
+                onClick={() => navigate('/map')}
               >
                 <Icon name="Route" size={18} className="mr-2" />
                 Маршруты
